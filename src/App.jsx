@@ -67,6 +67,9 @@ function App() {
   const [stopwatchTime, setStopwatchTime] = useState(0)
   const [isStopwatchRunning, setIsStopwatchRunning] = useState(false)
   
+  // Fullscreen state
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  
   const intervalRef = useRef(null)
 
   // Countdown timer effect
@@ -209,6 +212,33 @@ function App() {
     setStopwatchTime(0)
     setMode(newMode)
   }
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        setIsFullscreen(true)
+      }).catch((err) => {
+        console.log('Error attempting to enable fullscreen:', err)
+      })
+    } else {
+      document.exitFullscreen().then(() => {
+        setIsFullscreen(false)
+      })
+    }
+  }
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    }
+  }, [])
 
   const formatTime = (time) => {
     const m = Math.floor(time / 60)
@@ -455,6 +485,25 @@ function App() {
           </>
         )}
       </motion.div>
+      
+      {/* Fullscreen Toggle Button */}
+      <motion.button
+        className="fullscreen-btn"
+        onClick={toggleFullscreen}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+      >
+        {isFullscreen ? (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+          </svg>
+        ) : (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+          </svg>
+        )}
+      </motion.button>
     </div>
   )
 }
