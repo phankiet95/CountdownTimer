@@ -487,6 +487,33 @@
   height: 24px;
 }
 
+.language-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 110px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  color: #667eea;
+  z-index: 1000;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.language-btn:hover {
+  background: white;
+  box-shadow: 0 6px 30px rgba(102, 126, 234, 0.4);
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 30px 25px;
@@ -537,5 +564,13 @@
   .fullscreen-btn svg {
     width: 20px;
     height: 20px;
+  }
+
+  .language-btn {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 85px;
+    font-size: 0.9rem;
   }
 }

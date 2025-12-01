@@ -70,7 +70,46 @@ function App() {
   // Fullscreen state
   const [isFullscreen, setIsFullscreen] = useState(false)
   
+  // Language state
+  const [language, setLanguage] = useState('en') // 'en' or 'vi'
+  
   const intervalRef = useRef(null)
+
+  // Translation object
+  const translations = {
+    en: {
+      countdownTimer: 'Countdown Timer',
+      stopwatch: 'Stopwatch',
+      countdown: 'Countdown',
+      minutes: 'Minutes',
+      seconds: 'Seconds',
+      start: 'Start',
+      pause: 'Pause',
+      resume: 'Resume',
+      reset: 'Reset',
+      back: 'Back',
+      timeUp: "🎉 Time's up!",
+      enterFullscreen: 'Enter Fullscreen',
+      exitFullscreen: 'Exit Fullscreen'
+    },
+    vi: {
+      countdownTimer: 'Đếm Ngược',
+      stopwatch: 'Đồng Hồ Bấm Giờ',
+      countdown: 'Đếm Ngược',
+      minutes: 'Phút',
+      seconds: 'Giây',
+      start: 'Bắt Đầu',
+      pause: 'Tạm Dừng',
+      resume: 'Tiếp Tục',
+      reset: 'Đặt Lại',
+      back: 'Quay Lại',
+      timeUp: '🎉 Hết giờ!',
+      enterFullscreen: 'Toàn Màn Hình',
+      exitFullscreen: 'Thoát Toàn Màn Hình'
+    }
+  }
+
+  const t = translations[language]
 
   // Countdown timer effect
   useEffect(() => {
@@ -227,6 +266,10 @@ function App() {
     }
   }
 
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'vi' : 'en')
+  }
+
   // Listen for fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -258,7 +301,7 @@ function App() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="title">{mode === 'countdown' ? 'Countdown Timer' : 'Stopwatch'}</h1>
+        <h1 className="title">{mode === 'countdown' ? t.countdownTimer : t.stopwatch}</h1>
         
         {/* Mode Selector */}
         <div className="mode-selector">
@@ -268,7 +311,7 @@ function App() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Countdown
+            {t.countdown}
           </motion.button>
           <motion.button
             className={`mode-btn ${mode === 'stopwatch' ? 'active' : ''}`}
@@ -276,7 +319,7 @@ function App() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Stopwatch
+            {t.stopwatch}
           </motion.button>
         </div>
         
@@ -286,7 +329,7 @@ function App() {
           <div className="input-section">
             <div className="time-input-group">
               <div className="time-input">
-                <label>Minutes</label>
+                <label>{t.minutes}</label>
                 <input
                   type="number"
                   min="0"
@@ -296,7 +339,7 @@ function App() {
                 />
               </div>
               <div className="time-input">
-                <label>Seconds</label>
+                <label>{t.seconds}</label>
                 <select
                   value={seconds}
                   onChange={(e) => setSeconds(parseInt(e.target.value))}
@@ -357,7 +400,7 @@ function App() {
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 200 }}
               >
-                🎉 Time's up!
+                {t.timeUp}
               </motion.div>
             )}
           </>
@@ -372,7 +415,7 @@ function App() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Start
+                {t.start}
               </motion.button>
               {hasStarted && (
                 <motion.button
@@ -381,7 +424,7 @@ function App() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Back
+                  {t.back}
                 </motion.button>
               )}
             </>
@@ -394,7 +437,7 @@ function App() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Pause
+                  {t.pause}
                 </motion.button>
               ) : timeLeft > 0 ? (
                 <motion.button
@@ -403,7 +446,7 @@ function App() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Resume
+                  {t.resume}
                 </motion.button>
               ) : null}
               <motion.button
@@ -412,7 +455,7 @@ function App() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Back
+                {t.back}
               </motion.button>
             </>
           )}
@@ -433,7 +476,7 @@ function App() {
                       {String(m).padStart(2, '0')}
                     </motion.div>
                   </AnimatePresence>
-                  <span className="label">Minutes</span>
+                  <span className="label">{t.minutes}</span>
                 </div>
                 <span className="separator">:</span>
                 <div className="time-unit">
@@ -446,7 +489,7 @@ function App() {
                       {String(s).padStart(2, '0')}
                     </motion.div>
                   </AnimatePresence>
-                  <span className="label">Seconds</span>
+                  <span className="label">{t.seconds}</span>
                 </div>
               </div>
             </div>
@@ -459,7 +502,7 @@ function App() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Start
+                  {t.start}
                 </motion.button>
               ) : (
                 <>
@@ -469,7 +512,7 @@ function App() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {isStopwatchRunning ? 'Pause' : 'Resume'}
+                    {isStopwatchRunning ? t.pause : t.resume}
                   </motion.button>
                   <motion.button
                     className="btn btn-danger"
@@ -477,7 +520,7 @@ function App() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Reset
+                    {t.reset}
                   </motion.button>
                 </>
               )}
@@ -486,13 +529,24 @@ function App() {
         )}
       </motion.div>
       
+      {/* Language Toggle Button */}
+      <motion.button
+        className="language-btn"
+        onClick={toggleLanguage}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        title={language === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang Tiếng Anh'}
+      >
+        {language === 'en' ? 'VI' : 'EN'}
+      </motion.button>
+      
       {/* Fullscreen Toggle Button */}
       <motion.button
         className="fullscreen-btn"
         onClick={toggleFullscreen}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+        title={isFullscreen ? t.exitFullscreen : t.enterFullscreen}
       >
         {isFullscreen ? (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
