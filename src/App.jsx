@@ -54,14 +54,23 @@ const animationEffects = {
 }
 
 function App() {
+  const [mode, setMode] = useState('countdown') // 'countdown' or 'stopwatch'
+  
+  // Countdown states
   const [minutes, setMinutes] = useState(0)
   const [seconds, setSeconds] = useState(10)
   const [isRunning, setIsRunning] = useState(false)
   const [timeLeft, setTimeLeft] = useState(0)
+  
+  // Stopwatch states
+  const [stopwatchTime, setStopwatchTime] = useState(0)
+  const [isStopwatchRunning, setIsStopwatchRunning] = useState(false)
+  
   const intervalRef = useRef(null)
 
+  // Countdown timer effect
   useEffect(() => {
-    if (isRunning && timeLeft > 0) {
+    if (mode === 'countdown' && isRunning && timeLeft > 0) {
       intervalRef.current = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
@@ -71,7 +80,7 @@ function App() {
           return prev - 1
         })
       }, 1000)
-    } else {
+    } else if (mode === 'countdown') {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
       }
@@ -82,7 +91,68 @@ function App() {
         clearInterval(intervalRef.current)
       }
     }
-  }, [isRunning, timeLeft])
+  }, [mode, isRunning, timeLeft])
+
+  // Stopwatch effect
+  useEffect(() => {
+    if (mode === 'stopwatch' && isStopwatchRunning) {
+      intervalRef.current = setInterval(() => {
+        setStopwatchTime(prev => prev + 1)
+      }, 1000)
+    } else if (mode === 'stopwatch') {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [mode, isStopwatchRunning])
+
+  // Keyboard event handler for spacebar
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      // Check if spacebar is pressed and not in an input field
+      if (event.code === 'Space' && event.target.tagName !== 'INPUT') {
+        event.preventDefault()
+        
+        if (mode === 'countdown') {
+          if (timeLeft === 0 && !isRunning) {
+            // Start countdown if in setup state
+            startTimer()
+          } else if (timeLeft > 0) {
+            // Toggle pause/resume if timer is active
+            if (isRunning) {
+              pauseTimer()
+            } else {
+              resumeTimer()
+            }
+          }
+        } else if (mode === 'stopwatch') {
+          if (stopwatchTime === 0 && !isStopwatchRunning) {
+            // Start stopwatch if at 0
+            startStopwatch()
+          } else {
+            // Toggle pause/resume if stopwatch is active
+            if (isStopwatchRunning) {
+              pauseStopwatch()
+            } else {
+              resumeStopwatch()
+            }
+          }
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress)
+    }
+  }, [mode, isRunning, timeLeft, isStopwatchRunning, stopwatchTime, minutes, seconds])
 
   const startTimer = () => {
     const totalSeconds = minutes * 60 + seconds
@@ -105,13 +175,41 @@ function App() {
     setTimeLeft(0)
   }
 
+  // Stopwatch functions
+  const startStopwatch = () => {
+    setIsStopwatchRunning(true)
+  }
+
+  const pauseStopwatch = () => {
+    setIsStopwatchRunning(false)
+  }
+
+  const resumeStopwatch = () => {
+    setIsStopwatchRunning(true)
+  }
+
+  const resetStopwatch = () => {
+    setIsStopwatchRunning(false)
+    setStopwatchTime(0)
+  }
+
+  const switchMode = (newMode) => {
+    // Reset both timers when switching modes
+    setIsRunning(false)
+    setIsStopwatchRunning(false)
+    setTimeLeft(0)
+    setStopwatchTime(0)
+    setMode(newMode)
+  }
+
   const formatTime = (time) => {
     const m = Math.floor(time / 60)
     const s = time % 60
     return { m, s }
   }
 
-  const { m, s } = formatTime(timeLeft)
+  const displayTime = mode === 'countdown' ? formatTime(timeLeft) : formatTime(stopwatchTime)
+  const { m, s } = displayTime
   const effectConfig = animationEffects.flip
 
   return (
@@ -122,9 +220,31 @@ function App() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="title">Countdown Timer</h1>
+        <h1 className="title">{mode === 'countdown' ? 'Countdown Timer' : 'Stopwatch'}</h1>
         
-        {!isRunning && timeLeft === 0 ? (
+        {/* Mode Selector */}
+        <div className="mode-selector">
+          <motion.button
+            className={`mode-btn ${mode === 'countdown' ? 'active' : ''}`}
+            onClick={() => switchMode('countdown')}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Countdown
+          </motion.button>
+          <motion.button
+            className={`mode-btn ${mode === 'stopwatch' ? 'active' : ''}`}
+            onClick={() => switchMode('stopwatch')}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Stopwatch
+          </motion.button>
+        </div>
+        
+        {mode === 'countdown' ? (
+          <>
+            {!isRunning && timeLeft === 0 ? (
           <div className="input-section">
             <div className="time-input-group">
               <div className="time-input">
@@ -222,6 +342,73 @@ function App() {
           >
             🎉 Time's up!
           </motion.div>
+        )}
+          </>
+        ) : (
+          <>
+            {/* Stopwatch Display */}
+            <div className="timer-display">
+              <div className="time-units">
+                <div className="time-unit">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={m}
+                      className="digit-box"
+                      {...effectConfig}
+                    >
+                      {String(m).padStart(2, '0')}
+                    </motion.div>
+                  </AnimatePresence>
+                  <span className="label">Minutes</span>
+                </div>
+                <span className="separator">:</span>
+                <div className="time-unit">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={s}
+                      className="digit-box"
+                      {...effectConfig}
+                    >
+                      {String(s).padStart(2, '0')}
+                    </motion.div>
+                  </AnimatePresence>
+                  <span className="label">Seconds</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="controls">
+              {!isStopwatchRunning && stopwatchTime === 0 ? (
+                <motion.button
+                  className="btn btn-primary"
+                  onClick={startStopwatch}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Start
+                </motion.button>
+              ) : (
+                <>
+                  <motion.button
+                    className="btn btn-warning"
+                    onClick={isStopwatchRunning ? pauseStopwatch : resumeStopwatch}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {isStopwatchRunning ? 'Pause' : 'Resume'}
+                  </motion.button>
+                  <motion.button
+                    className="btn btn-danger"
+                    onClick={resetStopwatch}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Reset
+                  </motion.button>
+                </>
+              )}
+            </div>
+          </>
         )}
       </motion.div>
     </div>
