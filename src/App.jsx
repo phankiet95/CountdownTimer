@@ -61,6 +61,7 @@ function App() {
   const [seconds, setSeconds] = useState(10)
   const [isRunning, setIsRunning] = useState(false)
   const [timeLeft, setTimeLeft] = useState(0)
+  const [hasStarted, setHasStarted] = useState(false)
   
   // Stopwatch states
   const [stopwatchTime, setStopwatchTime] = useState(0)
@@ -159,6 +160,7 @@ function App() {
     if (totalSeconds > 0) {
       setTimeLeft(totalSeconds)
       setIsRunning(true)
+      setHasStarted(true)
     }
   }
 
@@ -173,6 +175,14 @@ function App() {
   const resetTimer = () => {
     setIsRunning(false)
     setTimeLeft(0)
+  }
+
+  const backToSetup = () => {
+    setIsRunning(false)
+    setTimeLeft(0)
+    setMinutes(0)
+    setSeconds(10)
+    setHasStarted(false)
   }
 
   // Stopwatch functions
@@ -244,7 +254,7 @@ function App() {
         
         {mode === 'countdown' ? (
           <>
-            {!isRunning && timeLeft === 0 ? (
+            {!hasStarted ? (
           <div className="input-section">
             <div className="time-input-group">
               <div className="time-input">
@@ -270,79 +280,104 @@ function App() {
             </div>
           </div>
         ) : (
-          <div className="timer-display">
-            <div className="time-units">
-              <div className="time-unit">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={m}
-                    className="digit-box"
-                    {...effectConfig}
-                  >
-                    {String(m).padStart(2, '0')}
-                  </motion.div>
-                </AnimatePresence>
-                <span className="label">Minutes</span>
-              </div>
-              <span className="separator">:</span>
-              <div className="time-unit">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={s}
-                    className="digit-box"
-                    {...effectConfig}
-                  >
-                    {String(s).padStart(2, '0')}
-                  </motion.div>
-                </AnimatePresence>
-                <span className="label">Seconds</span>
+          <>
+            <div className="timer-display">
+              <div className="time-units">
+                <div className="time-unit">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={m}
+                      className="digit-box"
+                      {...effectConfig}
+                    >
+                      {String(m).padStart(2, '0')}
+                    </motion.div>
+                  </AnimatePresence>
+                  <span className="label">Minutes</span>
+                </div>
+                <span className="separator">:</span>
+                <div className="time-unit">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={s}
+                      className="digit-box"
+                      {...effectConfig}
+                    >
+                      {String(s).padStart(2, '0')}
+                    </motion.div>
+                  </AnimatePresence>
+                  <span className="label">Seconds</span>
+                </div>
               </div>
             </div>
-          </div>
+            
+            {timeLeft === 0 && !isRunning && (
+              <motion.div
+                className="completion-message"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 200 }}
+              >
+                🎉 Time's up!
+              </motion.div>
+            )}
+          </>
         )}
 
         <div className="controls">
-          {!isRunning && timeLeft === 0 ? (
-            <motion.button
-              className="btn btn-primary"
-              onClick={startTimer}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Start
-            </motion.button>
-          ) : (
+          {!hasStarted || (timeLeft === 0 && !isRunning) ? (
             <>
               <motion.button
-                className="btn btn-warning"
-                onClick={isRunning ? pauseTimer : resumeTimer}
+                className="btn btn-primary"
+                onClick={startTimer}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {isRunning ? 'Pause' : 'Resume'}
+                Start
               </motion.button>
+              {hasStarted && (
+                <motion.button
+                  className="btn btn-secondary"
+                  onClick={backToSetup}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Back
+                </motion.button>
+              )}
+            </>
+          ) : (
+            <>
+              {isRunning ? (
+                <motion.button
+                  className="btn btn-warning"
+                  onClick={pauseTimer}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Pause
+                </motion.button>
+              ) : timeLeft > 0 ? (
+                <motion.button
+                  className="btn btn-warning"
+                  onClick={resumeTimer}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Resume
+                </motion.button>
+              ) : null}
               <motion.button
-                className="btn btn-danger"
-                onClick={resetTimer}
+                className="btn btn-secondary"
+                onClick={backToSetup}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Reset
+                Back
               </motion.button>
             </>
           )}
         </div>
-
-        {timeLeft === 0 && isRunning === false && (minutes > 0 || seconds > 0) && (
-          <motion.div
-            className="completion-message"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200 }}
-          >
-            🎉 Time's up!
-          </motion.div>
-        )}
           </>
         ) : (
           <>
