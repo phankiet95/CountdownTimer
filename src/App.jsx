@@ -70,10 +70,18 @@ function App() {
   // Fullscreen state
   const [isFullscreen, setIsFullscreen] = useState(false)
   
-  // Language state
-  const [language, setLanguage] = useState('en') // 'en' or 'vi'
+  // Language state - initialize from localStorage
+  const [language, setLanguage] = useState(() => {
+    const savedLanguage = localStorage.getItem('countdownTimerLanguage')
+    return savedLanguage || 'en'
+  })
   
   const intervalRef = useRef(null)
+
+  // Save language preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('countdownTimerLanguage', language)
+  }, [language])
 
   // Translation object
   const translations = {
