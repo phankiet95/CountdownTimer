@@ -555,6 +555,23 @@
   animation: pulse 2s ease-in-out infinite;
 }
 
+.audio-controls-container {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+}
+
+.audio-controls-container audio {
+  width: 300px;
+  height: 40px;
+  outline: none;
+}
+
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -636,5 +653,16 @@
   .music-btn svg {
     width: 20px;
     height: 20px;
+  }
+
+  .audio-controls-container {
+    bottom: 80px;
+    right: 10px;
+    padding: 10px;
+  }
+
+  .audio-controls-container audio {
+    width: 200px;
+    height: 35px;
   }
 }

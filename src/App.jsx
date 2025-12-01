@@ -133,14 +133,17 @@ function App() {
       setMusicFile(file)
       const url = URL.createObjectURL(file)
       setMusicUrl(url)
-      
-      // Create or update audio element
-      if (audioRef.current) {
-        audioRef.current.src = url
-        audioRef.current.loop = true
-      }
     }
   }
+
+  // Set audio source when musicUrl changes
+  useEffect(() => {
+    if (audioRef.current && musicUrl) {
+      audioRef.current.src = musicUrl
+      audioRef.current.loop = true
+      audioRef.current.load()
+    }
+  }, [musicUrl])
 
   // Control music playback based on timer state
   useEffect(() => {
@@ -614,8 +617,12 @@ function App() {
         style={{ display: 'none' }}
       />
       
-      {/* Audio element */}
-      <audio ref={audioRef} style={{ display: 'none' }} />
+      {/* Audio element with controls */}
+      {musicUrl && (
+        <div className="audio-controls-container">
+          <audio ref={audioRef} src={musicUrl} controls loop />
+        </div>
+      )}
       
       {/* Fullscreen Toggle Button */}
       <motion.button
