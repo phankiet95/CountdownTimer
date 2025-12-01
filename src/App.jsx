@@ -180,8 +180,6 @@ function App() {
   const backToSetup = () => {
     setIsRunning(false)
     setTimeLeft(0)
-    setMinutes(0)
-    setSeconds(10)
     setHasStarted(false)
   }
 
