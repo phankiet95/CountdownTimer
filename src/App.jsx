@@ -76,6 +76,11 @@ function App() {
     return savedLanguage || 'en'
   })
   
+  // Music state
+  const [musicFile, setMusicFile] = useState(null)
+  const [musicUrl, setMusicUrl] = useState(null)
+  const audioRef = useRef(null)
+  
   const intervalRef = useRef(null)
 
   // Save language preference to localStorage whenever it changes
@@ -98,7 +103,8 @@ function App() {
       back: 'Back',
       timeUp: "🎉 Time's up!",
       enterFullscreen: 'Enter Fullscreen',
-      exitFullscreen: 'Exit Fullscreen'
+      exitFullscreen: 'Exit Fullscreen',
+      selectMusic: 'Select Music'
     },
     vi: {
       countdownTimer: 'Đếm Ngược',
@@ -113,11 +119,48 @@ function App() {
       back: 'Quay Lại',
       timeUp: '🎉 Hết giờ!',
       enterFullscreen: 'Toàn Màn Hình',
-      exitFullscreen: 'Thoát Toàn Màn Hình'
+      exitFullscreen: 'Thoát Toàn Màn Hình',
+      selectMusic: 'Chọn Nhạc'
     }
   }
 
   const t = translations[language]
+
+  // Handle music file selection
+  const handleMusicSelect = (event) => {
+    const file = event.target.files[0]
+    if (file && file.type.startsWith('audio/')) {
+      setMusicFile(file)
+      const url = URL.createObjectURL(file)
+      setMusicUrl(url)
+      
+      // Create or update audio element
+      if (audioRef.current) {
+        audioRef.current.src = url
+        audioRef.current.loop = true
+      }
+    }
+  }
+
+  // Control music playback based on timer state
+  useEffect(() => {
+    if (audioRef.current && musicUrl) {
+      if ((mode === 'countdown' && isRunning) || (mode === 'stopwatch' && isStopwatchRunning)) {
+        audioRef.current.play().catch(err => console.log('Audio play error:', err))
+      } else {
+        audioRef.current.pause()
+      }
+    }
+  }, [isRunning, isStopwatchRunning, musicUrl, mode])
+
+  // Cleanup audio URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (musicUrl) {
+        URL.revokeObjectURL(musicUrl)
+      }
+    }
+  }, [musicUrl])
 
   // Countdown timer effect
   useEffect(() => {
@@ -547,6 +590,32 @@ function App() {
       >
         {language === 'en' ? 'VI' : 'EN'}
       </motion.button>
+      
+      {/* Music Selection Button */}
+      <motion.button
+        className="music-btn"
+        onClick={() => document.getElementById('music-input').click()}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        title={t.selectMusic}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 18V5l12-2v13" />
+          <circle cx="6" cy="18" r="3" />
+          <circle cx="18" cy="16" r="3" />
+        </svg>
+        {musicFile && <span className="music-indicator"></span>}
+      </motion.button>
+      <input
+        id="music-input"
+        type="file"
+        accept="audio/*"
+        onChange={handleMusicSelect}
+        style={{ display: 'none' }}
+      />
+      
+      {/* Audio element */}
+      <audio ref={audioRef} style={{ display: 'none' }} />
       
       {/* Fullscreen Toggle Button */}
       <motion.button
